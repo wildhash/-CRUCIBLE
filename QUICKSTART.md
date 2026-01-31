@@ -9,10 +9,31 @@ git clone https://github.com/wildhash/-CRUCIBLE.git
 cd -CRUCIBLE
 ```
 
-## Basic Usage
+## 🆕 Multi-Model Mode (Default)
+
+Run your concept through the **7-model adversarial gauntlet**:
 
 ```bash
 python3 crucible.py "Your startup concept here"
+```
+
+This orchestrates 7 specialized AI models in parallel:
+- 🧠 Claude Opus (Deep Reasoning Critic)
+- 💰 GPT-o3 (VC Skeptic)
+- ⚡ Gemini Flash (Speed Analyst)
+- 🔧 DeepSeek R1 (Technical Auditor)
+- 🎲 Grok (Contrarian)
+- 🌏 Kimi (APAC Expansion)
+- 💸 Qwen (Cost Optimizer)
+
+**Note**: By default, uses mock evaluators (rule-based). Configure API keys in `config/models.yaml` for real AI evaluations.
+
+## Legacy Mode
+
+Use the original single-agent evaluation:
+
+```bash
+python3 crucible.py "Your startup concept" --mode=legacy
 ```
 
 ## Example Evaluations
@@ -34,6 +55,16 @@ python3 crucible.py "Free mobile app for niche hobby with ad-supported model"
 python3 crucible.py "AI-powered productivity tool for remote teams"
 ```
 
+### Compare Multi-Model vs Legacy
+
+```bash
+# Multi-model (default)
+python3 crucible.py "B2B marketplace for freelancers"
+
+# Legacy mode
+python3 crucible.py "B2B marketplace for freelancers" --mode=legacy
+```
+
 ## Run Multiple Examples
 
 ```bash
@@ -45,8 +76,11 @@ This will walk you through 5 different startup concept evaluations.
 ## Run Tests
 
 ```bash
+# Original tests
 python3 test_crucible.py
-```
+
+# Multi-model architecture tests (18 new tests)
+python3 test_multimodel.py
 
 All 22 tests should pass, demonstrating that CRUCIBLE works correctly.
 

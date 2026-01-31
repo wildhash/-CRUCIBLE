@@ -6,7 +6,9 @@
 
 ## What is CRUCIBLE?
 
-CRUCIBLE is an adversarial evaluation agent that challenges startup concepts across 5 critical dimensions:
+CRUCIBLE is an **adversarial evaluation agent** that challenges startup concepts across 5 critical dimensions using **7 specialized AI models** working in parallel to provide comprehensive, multi-perspective analysis.
+
+### The 5 Dimensions
 
 1. **Market Viability** - Is there a real market? Will customers pay?
 2. **Technical Feasibility** - Can it actually be built? What are the risks?
@@ -14,20 +16,33 @@ CRUCIBLE is an adversarial evaluation agent that challenges startup concepts acr
 4. **Competitive Moats** - What prevents competitors from crushing you?
 5. **Scaling Bottlenecks** - What breaks when you try to grow?
 
-## How It Works
+## 🆕 Multi-Model Architecture
 
-CRUCIBLE adopts three adversarial perspectives to stress-test your idea:
+CRUCIBLE v2.0 orchestrates **7 specialized AI models**, each attacking from a unique adversarial perspective:
 
-- 🎯 **VC Skeptic** - "Show me the money and the moat"
-- 🔬 **Domain Expert** - "Here's why the tech won't work as planned"
-- ⚔️ **Competitor** - "Here's how I'd crush your business"
+- 🧠 **Claude Opus** (Deep Reasoning Critic) - Senior partner conducting deep diligence on business model nuance, ethical risks, and long-term viability
+- 💰 **GPT-o3** (VC Skeptic) - Battle-hardened VC finding fatal flaws in market size, competitive threats, and exit strategy
+- ⚡ **Gemini Flash** (Speed Analyst) - Fast market analyst providing broad market research and competitive landscape
+- 🔧 **DeepSeek R1** (Technical Auditor) - Principal engineer auditing architecture feasibility and scaling bottlenecks
+- 🎲 **Grok** (Contrarian) - Contrarian thinker finding unconventional angles and black swan risks
+- 🌏 **Kimi** (APAC Expansion) - APAC market specialist for China market and regulatory compliance
+- 💸 **Qwen** (Cost Optimizer) - Unit economics expert optimizing burn rate and capital efficiency
 
-Each dimension is scored 1-10 with specific failure modes identified. After the critique, CRUCIBLE synthesizes:
+### How Multi-Model Evaluation Works
 
-- ✅ **Kill/Proceed Decision** - Should you continue or pivot?
+1. **Phase 1: Parallel Evaluation** - All 7 models evaluate independently in parallel
+2. **Phase 2: Cross-Model Debate** - System identifies where models disagree (>3 point spread)
+3. **Phase 3: Consensus Synthesis** - Weighted consensus with minority reports for dissenting opinions
+
+After the gauntlet, CRUCIBLE synthesizes:
+
+- ✅ **Consensus Decision** - KILL, PROCEED_WITH_CAUTION, PROCEED, or STRONG_PROCEED
+- 🤖 **Model-by-Model Breakdown** - See how each model evaluated your concept
+- ⚔️ **Key Debates** - Where models disagreed significantly
 - 🎯 **Refined Concept** - Your idea, battle-tested and improved
-- 🔄 **Key Pivots** - Specific changes to make your concept stronger
-- 🧪 **3 Validation Experiments** - Concrete tests to validate your assumptions
+- 🔄 **Unified Pivots** - Synthesized from all models' recommendations
+- 🧪 **3 Validation Experiments** - Concrete tests to validate assumptions
+- ⚠️ **Minority Report** - Dissenting model's case (when models disagree >3 points)
 
 ## Installation
 
@@ -44,10 +59,22 @@ chmod +x crucible.py
 
 ## Usage
 
-### Basic Usage
+### Multi-Model Mode (Default)
+
+Run your concept through the **7-model adversarial gauntlet**:
 
 ```bash
-python crucible.py "Your startup concept here"
+python3 crucible.py "Your startup concept here"
+# OR explicitly
+python3 crucible.py "Your startup concept here" --mode=multi
+```
+
+### Legacy Mode
+
+Use the original rule-based single-agent evaluation:
+
+```bash
+python3 crucible.py "Your startup concept here" --mode=legacy
 ```
 
 ### Example
@@ -56,7 +83,119 @@ python crucible.py "Your startup concept here"
 python crucible.py "AI-powered fitness app that creates personalized workout plans using machine learning to analyze user performance and adapt in real-time"
 ```
 
-### Example Output
+## Configuration
+
+### API Keys (Optional)
+
+By default, CRUCIBLE uses **mock evaluators** (rule-based scoring) when API keys are not configured. This allows you to use CRUCIBLE immediately without any setup.
+
+To enable **real AI model evaluations**, configure API keys in `config/models.yaml`:
+
+```yaml
+models:
+  anthropic:
+    api_key: ${ANTHROPIC_API_KEY}
+    enabled: true
+    
+  openai:
+    api_key: ${OPENAI_API_KEY}
+    enabled: true
+    
+  google:
+    api_key: ${GOOGLE_API_KEY}
+    enabled: true
+    
+  # ... etc for other models
+```
+
+Or set environment variables:
+
+```bash
+export ANTHROPIC_API_KEY="your-key-here"
+export OPENAI_API_KEY="your-key-here"
+export GOOGLE_API_KEY="your-key-here"
+export DEEPSEEK_API_KEY="your-key-here"
+export XAI_API_KEY="your-key-here"
+export MOONSHOT_API_KEY="your-key-here"
+export ALIBABA_API_KEY="your-key-here"
+```
+
+**Note**: Even without API keys, CRUCIBLE provides valuable analysis using sophisticated rule-based mock evaluators that simulate each model's perspective.
+
+## Example Output
+
+### Multi-Model Output
+
+```
+🔥 CRUCIBLE MULTI-MODEL EVALUATION REPORT
+======================================================================
+
+Original Concept:
+B2B SaaS platform with proven revenue
+
+----------------------------------------------------------------------
+🤖 MODEL EVALUATIONS (7 models)
+----------------------------------------------------------------------
+
+claude_opus (deep_reasoning_critic)
+  Average Score: 7.2/10 | Confidence: 85.0%
+  Scores: Market Viability: 8, Technical Feasibility: 7, Unit Economics: 8, 
+          Competitive Moats: 6, Scaling Bottlenecks: 7
+
+gpt_o3 (vc_skeptic)
+  Average Score: 6.8/10 | Confidence: 90.0%
+  Scores: Market Viability: 7, Technical Feasibility: 6, Unit Economics: 8,
+          Competitive Moats: 5, Scaling Bottlenecks: 8
+
+[... 5 more models ...]
+
+----------------------------------------------------------------------
+⚔️  KEY DEBATES (Model Disagreements)
+----------------------------------------------------------------------
+  • Technical Feasibility: Models disagree (range 4-8, avg 6.3) - requires deeper analysis
+  • Competitive Moats: Models disagree (range 3-7, avg 5.1) - requires deeper analysis
+
+----------------------------------------------------------------------
+📊 CONSENSUS DIMENSION SCORES
+----------------------------------------------------------------------
+
+Market Viability: 8/10 [vc_skeptic]
+  Consensus Reasoning: Strong market indicators with proven revenue...
+  Failure Modes:
+    - Market saturation in enterprise space
+    - Customer acquisition costs may exceed projections
+    
+[Additional dimensions...]
+
+======================================================================
+Consensus Score: 7.1/10
+
+✓ DECISION: PROCEED
+======================================================================
+
+⚠️  MINORITY REPORT:
+grok (contrarian) strongly disagrees: Scored 5.2 vs consensus 7.1. 
+Black swan risk: Market paradigm shift to AI agents could make SaaS obsolete.
+
+🎯 REFINED CONCEPT:
+B2B SaaS platform with proven revenue PIVOTS: Build defensible moat through 
+data network effects AND Prepare for AI agent integration strategy
+
+----------------------------------------------------------------------
+🔄 UNIFIED PIVOTS (From All Models)
+----------------------------------------------------------------------
+1. Build defensible moat through data network effects and customer lock-in
+2. Develop AI agent integration strategy to future-proof against disruption
+3. Accelerate international expansion to diversify market risk
+
+----------------------------------------------------------------------
+🧪 VALIDATION EXPERIMENTS (Top 3)
+----------------------------------------------------------------------
+
+[Experiments...]
+```
+
+### Legacy Output Example
 
 ```
 🔥 CRUCIBLE: Adversarial Evaluation Initiated
