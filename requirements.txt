@@ -1,0 +1,7 @@
+# CRUCIBLE Dependencies
+# 
+# For real LLM API evaluations
+httpx>=0.27.0  # Async HTTP client for API calls
+
+# Optional: For YAML config parsing (already using yaml in config)
+# pyyaml>=6.0

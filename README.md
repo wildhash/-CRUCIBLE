@@ -80,7 +80,7 @@ python3 crucible.py "Your startup concept here" --mode=legacy
 ### Example
 
 ```bash
-python crucible.py "AI-powered fitness app that creates personalized workout plans using machine learning to analyze user performance and adapt in real-time"
+python3 crucible.py "AI-powered fitness app that creates personalized workout plans using machine learning to analyze user performance and adapt in real-time"
 ```
 
 ## Configuration
@@ -89,7 +89,17 @@ python crucible.py "AI-powered fitness app that creates personalized workout pla
 
 By default, CRUCIBLE uses **mock evaluators** (rule-based scoring) when API keys are not configured. This allows you to use CRUCIBLE immediately without any setup.
 
-To enable **real AI model evaluations**, configure API keys in `config/models.yaml`:
+To enable **real AI model evaluations** with actual LLM APIs:
+
+#### 1. Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+#### 2. Set API Keys
+
+Configure API keys in `config/models.yaml`:
 
 ```yaml
 models:
@@ -105,7 +115,13 @@ models:
     api_key: ${GOOGLE_API_KEY}
     enabled: true
     
-  # ... etc for other models
+  deepseek:
+    api_key: ${DEEPSEEK_API_KEY}
+    enabled: true
+    
+  xai:
+    api_key: ${XAI_API_KEY}
+    enabled: true
 ```
 
 Or set environment variables:
@@ -116,8 +132,18 @@ export OPENAI_API_KEY="your-key-here"
 export GOOGLE_API_KEY="your-key-here"
 export DEEPSEEK_API_KEY="your-key-here"
 export XAI_API_KEY="your-key-here"
-export MOONSHOT_API_KEY="your-key-here"
-export ALIBABA_API_KEY="your-key-here"
+```
+
+#### 3. Enable Real API Mode
+
+Modify `crucible.py` to use real APIs:
+
+```python
+# In crucible.py, change:
+orchestrator = CrucibleOrchestrator(use_mock=False)  # Enable real APIs
+```
+
+**See [docs/API_USAGE.md](docs/API_USAGE.md) for detailed API setup guide.**
 ```
 
 **Note**: Even without API keys, CRUCIBLE provides valuable analysis using sophisticated rule-based mock evaluators that simulate each model's perspective.

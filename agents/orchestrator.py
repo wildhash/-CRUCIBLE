@@ -45,10 +45,57 @@ class CrucibleOrchestrator:
         self._initialize_evaluators()
     
     def _initialize_evaluators(self):
-        """Initialize all model evaluators"""
+        """Initialize all model evaluators - real API or mock fallback"""
+        import os
+        
+        # Try to import real evaluators
+        try:
+            from agents.evaluators.claude_critic import ClaudeEvaluator
+            from agents.evaluators.gpt_skeptic import GPTEvaluator
+            from agents.evaluators.deepseek_tech import DeepSeekEvaluator
+            from agents.evaluators.grok_contrarian import GrokEvaluator
+            from agents.evaluators.gemini_analyst import GeminiEvaluator
+        except ImportError:
+            # If imports fail, use mock for all
+            for model_name, config in EVALUATOR_MODELS.items():
+                self.evaluators[model_name] = MockEvaluator(
+                    model_name=model_name,
+                    role=config["role"]
+                )
+            return
+        
+        # Map model names to evaluator classes
+        evaluator_classes = {
+            "claude_opus": ClaudeEvaluator,
+            "gpt_o3": GPTEvaluator,
+            "deepseek_r1": DeepSeekEvaluator,
+            "grok": GrokEvaluator,
+            "gemini_flash": GeminiEvaluator,
+        }
+        
         for model_name, config in EVALUATOR_MODELS.items():
-            # For now, always use mock evaluators
-            # TODO: Implement real API evaluators when ready
+            # Check if we should use real API evaluator
+            if not self.use_mock and model_name in evaluator_classes:
+                # Check if API key is available
+                api_env_var = {
+                    "claude_opus": "ANTHROPIC_API_KEY",
+                    "gpt_o3": "OPENAI_API_KEY",
+                    "deepseek_r1": "DEEPSEEK_API_KEY",
+                    "grok": "XAI_API_KEY",
+                    "gemini_flash": "GOOGLE_API_KEY",
+                }.get(model_name)
+                
+                if api_env_var and os.getenv(api_env_var):
+                    try:
+                        # Try to instantiate real evaluator
+                        evaluator_class = evaluator_classes[model_name]
+                        self.evaluators[model_name] = evaluator_class()
+                        print(f"  ✓ Initialized real API evaluator: {model_name}")
+                        continue
+                    except Exception as e:
+                        print(f"  ⚠ Failed to init {model_name} API evaluator: {e}")
+            
+            # Fallback to mock evaluator
             self.evaluators[model_name] = MockEvaluator(
                 model_name=model_name,
                 role=config["role"]
