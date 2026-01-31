@@ -10,8 +10,9 @@ Weak ideas die here so strong ones survive.
 
 import json
 import sys
+import asyncio
 from dataclasses import dataclass, asdict
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Optional
 from enum import Enum
 
 
@@ -687,39 +688,188 @@ def format_output(result: EvaluationResult) -> str:
     return "\n".join(output)
 
 
+def format_multimodel_output(verdict) -> str:
+    """Format multi-model verdict for display"""
+    from models.evaluation import CrucibleVerdict
+    
+    output = []
+    output.append("\n" + "=" * 70)
+    output.append("🔥 CRUCIBLE MULTI-MODEL EVALUATION REPORT")
+    output.append("=" * 70)
+    output.append(f"\nOriginal Concept:\n{verdict.original_concept}\n")
+    
+    # Show model evaluations summary
+    output.append("\n" + "-" * 70)
+    output.append(f"🤖 MODEL EVALUATIONS ({len(verdict.model_evaluations)} models)")
+    output.append("-" * 70)
+    
+    for model_eval in verdict.model_evaluations:
+        avg_score = sum(model_eval.scores.values()) / len(model_eval.scores) if model_eval.scores else 0
+        output.append(f"\n{model_eval.model_name} ({model_eval.role})")
+        output.append(f"  Average Score: {avg_score:.1f}/10 | Confidence: {model_eval.confidence:.1%}")
+        output.append(f"  Scores: {', '.join(f'{k}: {v}' for k, v in model_eval.scores.items())}")
+    
+    # Show key debates
+    if verdict.key_debates:
+        output.append("\n" + "-" * 70)
+        output.append("⚔️  KEY DEBATES (Model Disagreements)")
+        output.append("-" * 70)
+        for debate in verdict.key_debates:
+            output.append(f"  • {debate}")
+    
+    # Show dimension scores (consensus)
+    output.append("\n" + "-" * 70)
+    output.append("📊 CONSENSUS DIMENSION SCORES")
+    output.append("-" * 70)
+    
+    for score in verdict.dimension_scores:
+        output.append(f"\n{score.dimension}: {score.score}/10 [{score.perspective}]")
+        output.append(f"  Consensus Reasoning: {score.reasoning}")
+        if score.failure_modes:
+            output.append(f"  Failure Modes:")
+            for fm in score.failure_modes[:3]:
+                output.append(f"    - {fm}")
+    
+    output.append(f"\n{'=' * 70}")
+    output.append(f"Consensus Score: {verdict.consensus_score:.1f}/10")
+    
+    # Decision with visual indicator
+    decision_icons = {
+        Decision.KILL: "❌",
+        Decision.PROCEED_WITH_CAUTION: "⚠️",
+        Decision.PROCEED: "✓",
+        Decision.STRONG_PROCEED: "✓✓"
+    }
+    icon = decision_icons.get(verdict.decision, "?")
+    output.append(f"\n{icon} DECISION: {verdict.decision.value}")
+    output.append("=" * 70)
+    
+    # Minority report
+    if verdict.minority_report:
+        output.append(f"\n\n⚠️  MINORITY REPORT:")
+        output.append(f"{verdict.minority_report}\n")
+    
+    output.append(f"\n\n🎯 REFINED CONCEPT:\n{verdict.refined_concept}\n")
+    
+    output.append("\n" + "-" * 70)
+    output.append("🔄 UNIFIED PIVOTS (From All Models)")
+    output.append("-" * 70)
+    for i, pivot in enumerate(verdict.unified_pivots, 1):
+        output.append(f"{i}. {pivot}")
+    
+    output.append("\n" + "-" * 70)
+    output.append("🧪 VALIDATION EXPERIMENTS (Top 3)")
+    output.append("-" * 70)
+    
+    for i, exp in enumerate(verdict.validation_experiments, 1):
+        output.append(f"\nExperiment {i}: {exp.title}")
+        output.append(f"  Hypothesis: {exp.hypothesis}")
+        output.append(f"  Method: {exp.method}")
+        output.append(f"  Success Criteria: {exp.success_criteria}")
+        output.append(f"  Cost: {exp.estimated_cost}")
+        output.append(f"  Time: {exp.estimated_time}")
+    
+    output.append("\n" + "-" * 70)
+    output.append("⚠️  CRITICAL RISKS")
+    output.append("-" * 70)
+    for risk in verdict.critical_risks:
+        output.append(f"  - {risk}")
+    
+    output.append("\n" + "=" * 70)
+    output.append("Weak ideas die here so strong ones survive. 🔥")
+    output.append("=" * 70 + "\n")
+    
+    return "\n".join(output)
+
+
 def main():
     """Main entry point for CRUCIBLE CLI"""
     
     if len(sys.argv) < 2:
-        print("Usage: python crucible.py <startup_concept>")
+        print("Usage: python crucible.py <startup_concept> [--mode=multi|legacy]")
+        print("\nModes:")
+        print("  --mode=multi   : Multi-model adversarial evaluation (default)")
+        print("  --mode=legacy  : Original rule-based evaluation")
         print("\nExample:")
-        print('  python crucible.py "AI-powered fitness app that creates personalized workout plans"')
+        print('  python crucible.py "AI-powered fitness app" --mode=multi')
         sys.exit(1)
     
-    concept = " ".join(sys.argv[1:])
+    # Parse arguments
+    args = sys.argv[1:]
+    mode = "multi"  # Default to multi-model
+    concept_parts = []
     
-    evaluator = CrucibleEvaluator()
-    result = evaluator.evaluate(concept)
+    for arg in args:
+        if arg.startswith("--mode="):
+            mode = arg.split("=")[1]
+        else:
+            concept_parts.append(arg)
     
-    print(format_output(result))
+    concept = " ".join(concept_parts)
     
-    # Also save to JSON for programmatic use
-    output_file = "crucible_evaluation.json"
-    with open(output_file, 'w') as f:
-        # Convert dataclasses to dict
-        result_dict = asdict(result)
-        result_dict['decision'] = result.decision.value
-        json.dump(result_dict, f, indent=2)
+    if mode == "multi":
+        # Multi-model evaluation
+        print("🔥 CRUCIBLE Multi-Model Mode")
+        print("=" * 70)
+        
+        try:
+            from agents.orchestrator import CrucibleOrchestrator
+            
+            orchestrator = CrucibleOrchestrator(use_mock=True)
+            verdict = asyncio.run(orchestrator.run_adversarial_evaluation(concept))
+            
+            print(format_multimodel_output(verdict))
+            
+            # Save to JSON
+            output_file = "crucible_evaluation.json"
+            with open(output_file, 'w') as f:
+                # Convert to dict
+                verdict_dict = asdict(verdict)
+                verdict_dict['decision'] = verdict.decision.value
+                json.dump(verdict_dict, f, indent=2)
+            
+            print(f"📄 Detailed results saved to: {output_file}")
+            
+            # Exit code based on decision
+            if verdict.decision == Decision.KILL:
+                sys.exit(1)
+            elif verdict.decision == Decision.PROCEED_WITH_CAUTION:
+                sys.exit(2)
+            else:
+                sys.exit(0)
+                
+        except Exception as e:
+            print(f"\n❌ Multi-model evaluation failed: {str(e)}")
+            print("Falling back to legacy mode...\n")
+            mode = "legacy"
     
-    print(f"📄 Detailed results saved to: {output_file}")
-    
-    # Exit code based on decision
-    if result.decision == Decision.KILL:
-        sys.exit(1)
-    elif result.decision == Decision.PROCEED_WITH_CAUTION:
-        sys.exit(2)
-    else:
-        sys.exit(0)
+    if mode == "legacy":
+        # Legacy rule-based evaluation
+        print("🔥 CRUCIBLE Legacy Mode")
+        print("=" * 70)
+        
+        evaluator = CrucibleEvaluator()
+        result = evaluator.evaluate(concept)
+        
+        print(format_output(result))
+        
+        # Also save to JSON for programmatic use
+        output_file = "crucible_evaluation.json"
+        with open(output_file, 'w') as f:
+            # Convert dataclasses to dict
+            result_dict = asdict(result)
+            result_dict['decision'] = result.decision.value
+            json.dump(result_dict, f, indent=2)
+        
+        print(f"📄 Detailed results saved to: {output_file}")
+        
+        # Exit code based on decision
+        if result.decision == Decision.KILL:
+            sys.exit(1)
+        elif result.decision == Decision.PROCEED_WITH_CAUTION:
+            sys.exit(2)
+        else:
+            sys.exit(0)
 
 
 if __name__ == "__main__":
