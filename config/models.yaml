@@ -1,0 +1,65 @@
+# CRUCIBLE Model Configuration
+# 
+# Configure API keys for different model providers
+# Set as environment variables or edit this file
+
+models:
+  anthropic:
+    api_key: ${ANTHROPIC_API_KEY}
+    model: claude-opus-4-5-20251101
+    enabled: false  # Set to true when API key is available
+    
+  openai:
+    api_key: ${OPENAI_API_KEY}
+    model: o3
+    enabled: false
+    
+  google:
+    api_key: ${GOOGLE_API_KEY}
+    model: gemini-2.5-flash
+    enabled: false
+    
+  deepseek:
+    api_key: ${DEEPSEEK_API_KEY}
+    model: deepseek-r1
+    enabled: false
+    
+  xai:
+    api_key: ${XAI_API_KEY}
+    model: grok-3
+    enabled: false
+    
+  moonshot:
+    api_key: ${MOONSHOT_API_KEY}
+    model: kimi
+    enabled: false
+    
+  alibaba:
+    api_key: ${ALIBABA_API_KEY}
+    model: qwen
+    enabled: false
+
+# Orchestrator settings
+orchestrator:
+  # Use mock evaluators when API keys not available
+  use_mock: true
+  
+  # Number of parallel model calls
+  max_parallel: 7
+  
+  # Timeout for each model evaluation (seconds)
+  timeout: 30
+  
+  # Minimum confidence threshold
+  min_confidence: 0.3
+  
+# Output settings
+output:
+  # Include model-by-model breakdown in output
+  show_model_details: true
+  
+  # Include debate points
+  show_debates: true
+  
+  # Include minority report when present
+  show_minority_report: true
