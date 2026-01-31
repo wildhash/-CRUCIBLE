@@ -36,6 +36,9 @@ env/
 crucible_evaluation.json
 example_*.json
 
+# Demo scripts
+multimodel_demo.sh
+
 # OS
 .DS_Store
 Thumbs.db
