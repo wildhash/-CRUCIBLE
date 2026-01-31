@@ -1,4 +1,58 @@
-# CRUCIBLE v2.0 - Multi-Model Architecture Release
+# CRUCIBLE Changelog
+
+## v2.1 - Real LLM API Integrations (2026-01-31)
+
+### 🚀 New Features
+
+**Real LLM API Evaluators** - Production-ready AI model integrations:
+
+- ✅ **Claude Opus** (Anthropic) - Deep reasoning critic via Claude API
+- ✅ **GPT-4** (OpenAI) - VC skeptic via OpenAI Chat Completions
+- ✅ **DeepSeek R1** - Technical auditor via DeepSeek API
+- ✅ **Grok** (xAI) - Contrarian via xAI Chat API
+- ✅ **Gemini Flash** (Google) - Speed analyst via Google GenerativeAI
+
+**Smart Dual-Mode Operation**:
+- Mock mode (default): Zero-setup, uses rule-based evaluators
+- Real API mode: Enable with `use_mock=False` and API keys
+- Automatic fallback: If API fails, gracefully falls back to mock
+- Per-model selection: Can mix real and mock evaluators
+
+### 📦 Dependencies
+
+- Added `httpx>=0.27.0` for async HTTP client
+- Created `requirements.txt` for easy installation
+
+### 📚 Documentation
+
+- New `docs/API_USAGE.md` - Complete API setup guide
+- Updated `README.md` - API configuration section
+- Cost estimation tables for real API usage
+
+### 🔧 Technical Changes
+
+- Enhanced `agents/orchestrator.py` - Smart evaluator initialization
+- Added 5 new evaluator files in `agents/evaluators/`
+- Each evaluator implements async API calls with error handling
+- JSON response parsing with fallback handling
+
+### 💰 Cost & Performance
+
+| Mode | Cost/Eval | Latency | Quality |
+|------|-----------|---------|---------|
+| Mock | $0 | 5ms | Rule-based |
+| Real (1-2 models) | $0.01-0.05 | 2-5s | AI-powered |
+| Real (all 5) | $0.30-0.80 | 5-8s | Multi-AI consensus |
+
+### ✅ Testing
+
+- All 18 existing tests still passing
+- Verified evaluator imports and initialization
+- Tested both mock and real API modes
+
+---
+
+## v2.0 - Multi-Model Architecture Release (2026-01-31)
 
 ## 🎉 What's New in v2.0
 
